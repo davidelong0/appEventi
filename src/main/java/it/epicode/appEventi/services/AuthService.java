@@ -2,6 +2,7 @@ package it.epicode.appEventi.services;
 
 import it.epicode.appEventi.dto.AuthResponse;
 import it.epicode.appEventi.dto.LoginRequest;
+import it.epicode.appEventi.exceptions.EmailAlreadyExistsException;
 import it.epicode.appEventi.models.User;
 import it.epicode.appEventi.payloads.RegisterRequest;
 import it.epicode.appEventi.repositories.UserRepository;
@@ -22,6 +23,10 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public void register(RegisterRequest request) {
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new EmailAlreadyExistsException("Email già registrata");
+        }
+
         User user = new User();
         user.setName(request.getFullName());
         user.setEmail(request.getEmail());
@@ -29,6 +34,7 @@ public class AuthService {
         user.setRole(request.getRole());
         userRepository.save(user);
     }
+
 
     public AuthResponse login(LoginRequest request) {
         authenticationManager.authenticate(
